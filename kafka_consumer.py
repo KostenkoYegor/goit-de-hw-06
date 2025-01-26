@@ -1,3 +1,5 @@
+# kafka_consumer.py
+
 from kafka_config import create_consumer
 
 def consume_sensor_data():

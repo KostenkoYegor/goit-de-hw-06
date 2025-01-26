@@ -1,3 +1,5 @@
+# main.py
+
 from kafka_producer import produce_sensor_data
 from aggregating import aggregate_sensor_data
 from kafka_alert_consumer import consume_alerts

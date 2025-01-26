@@ -1,3 +1,5 @@
+#kafka_config.py
+
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.admin import KafkaAdminClient, NewTopic
 import json

@@ -1,3 +1,5 @@
+# aggregating.py
+
 from kafka_config import create_consumer
 import pandas as pd
 from datetime import datetime, timedelta
