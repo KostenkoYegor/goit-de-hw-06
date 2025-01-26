@@ -5,12 +5,12 @@ import threading
 def send_sensor_data():
     producer = create_producer()
 
-    # Пример отправки данных
+    # Example of sending sensor data
     try:
         producer.send('yk_building_sensors', value={'sensor_id': 123, 'temperature': 25, 'humidity': 60})
         producer.send('yk_temperature_alerts', value={'sensor_id': 123, 'alert': 'Temperature too high'})
         producer.send('yk_humidity_alerts', value={'sensor_id': 123, 'alert': 'Humidity out of range'})
-        producer.flush()  # Ожидание отправки сообщений
+        producer.flush()  # Wait for the messages to be sent
         print("Data sent successfully.")
     except Exception as e:
         print(f"Error sending data: {e}")
@@ -18,18 +18,18 @@ def send_sensor_data():
         producer.close()
 
 def consume_alerts():
-    consumer = create_consumer('yk_temperature_alerts')  # Пример для получения алертов
+    consumer = create_consumer('yk_temperature_alerts')  # Example for consuming alerts
 
     for message in consumer:
         print(f"Received message from topic '{message.topic}': {message.value}")
-        break  # Прерываем после получения первого сообщения
+        break  # Stop after receiving the first message
 
 def aggregate_sensor_data():
-    # Здесь логика агрегации, если необходимо
+    # Logic for aggregating data, if necessary
     print("Aggregating sensor data...")
 
 if __name__ == "__main__":
-    # Запуск продюсера, агрегации и потребителя в отдельных потоках
+    # Start producer, aggregation, and consumer in separate threads
     producer_thread = threading.Thread(target=send_sensor_data)
     aggregation_thread = threading.Thread(target=aggregate_sensor_data)
     alert_consumer_thread = threading.Thread(target=consume_alerts)
