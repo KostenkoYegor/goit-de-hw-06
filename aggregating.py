@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from kafka import KafkaProducer
 import json
+import sys
 
 # Kafka producer setup
 producer = KafkaProducer(
@@ -32,11 +33,10 @@ def send_alert(window_start, window_end, t_avg, h_avg, code, message):
     print(f"Alert sent: {alert_data}")
 
 def aggregate_sensor_data(window_duration=60, sliding_interval=30, watermark_duration=10):
-    consumer = create_consumer('yk_building_sensors')  # Теперь эта строка должна работать
+    consumer = create_consumer('yk_building_sensors')
     data_buffer = []
     window_start = None
     
-    # Example alert conditions
     alert_conditions = {
         'min_temperature': 18,
         'max_temperature': 30,
@@ -45,21 +45,23 @@ def aggregate_sensor_data(window_duration=60, sliding_interval=30, watermark_dur
         'code': '104',
         'message': 'Alert: Conditions outside of the safe range'
     }
+
+    print("Aggregation process started.")
     
     try:
         while True:
             for message in consumer:
                 data = message.value
                 timestamp = datetime.strptime(data["timestamp"], "%Y-%m-%d %H:%M:%S")
-                
-                # Add data to buffer
                 data_buffer.append({"timestamp": timestamp, "temperature": data["temperature"], "humidity": data["humidity"]})
+                print(f"Data received: {data}")
                 
-                # Remove old data based on sliding window
                 data_buffer = [entry for entry in data_buffer if entry["timestamp"] > timestamp - timedelta(seconds=window_duration)]
+                print(f"Buffer after cleaning: {data_buffer}")
                 
                 if window_start is None:
                     window_start = timestamp
+                    print(f"Window start set to: {window_start}")
                 
                 if timestamp - window_start >= timedelta(seconds=window_duration):
                     df = pd.DataFrame(data_buffer)
@@ -67,18 +69,19 @@ def aggregate_sensor_data(window_duration=60, sliding_interval=30, watermark_dur
                     avg_humidity = df["humidity"].mean()
                     print(f"Aggregated Data - Temp: {avg_temp}, Humidity: {avg_humidity}")
                     
-                    # Check for alert conditions
                     if (alert_conditions['min_temperature'] <= avg_temp <= alert_conditions['max_temperature'] and
                         alert_conditions['min_humidity'] <= avg_humidity <= alert_conditions['max_humidity']):
                         window_end = timestamp
+                        print(f"Conditions met for alert. Sending alert...")
                         send_alert(window_start, window_end, avg_temp, avg_humidity, alert_conditions['code'], alert_conditions['message'])
                     
-                    # Reset window
                     window_start = timestamp
                     data_buffer = []
+                    print(f"Window reset. New window start: {window_start}")
+                    
     except KeyboardInterrupt:
         print("Aggregation stopped.")
     finally:
         consumer.close()
-
-aggregate_sensor_data()
+        print("Consumer closed.")
+        sys.exit(0)  # Ensure the program exits gracefully after interruption

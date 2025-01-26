@@ -5,7 +5,6 @@ import time
 import random
 
 def generate_sensor_data():
-
     return {
         "id": random.randint(1, 100),
         "temperature": random.uniform(18, 35),
@@ -22,15 +21,16 @@ def produce_sensor_data():
         
         topic = 'yk_building_sensors'
         
-        while True:
+        # Ограничиваем количество отправок до 5
+        for _ in range(5):
             data = generate_sensor_data()
             try:
                 producer.send(topic, value=data)
                 print(f"Sent data: {data}")
             except Exception as e:
                 print(f"Error while sending data: {e}")
-            time.sleep(1)
-    
+            time.sleep(1)  # Задержка между отправками
+        
     except KeyboardInterrupt:
         print("Producer stopped.")
     except Exception as e:
