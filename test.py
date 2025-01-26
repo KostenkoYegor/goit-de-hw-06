@@ -1,3 +1,5 @@
+#test.py
+
 from kafka import KafkaConsumer
 
 KAFKA_CONFIG = {
@@ -8,16 +10,19 @@ KAFKA_CONFIG = {
     'sasl_plain_password': "VawEzo1ikLtrA8Ug8THa"
 }
 
-# Consumer example
+topics = [
+    'yk_building_sensors',
+    'yk_temperature_alerts',
+    'yk_humidity_alerts'
+]
 consumer = KafkaConsumer(
-    'your_topic',  # Замените на ваш актуальный топик
+    *topics,  
     **KAFKA_CONFIG,
     group_id='your_group_id',
-    auto_offset_reset='earliest'  # Для получения всех сообщений с начала
+    auto_offset_reset='earliest'  
 )
 
-# Прочитаем и выведем все сообщения
 for message in consumer:
-    print(f"Received message: {message.value.decode('utf-8')}")
-    # После получения одного сообщения можно выйти
+    print(f"Received message from topic '{message.topic}': {message.value.decode('utf-8')}")
+   
     break
