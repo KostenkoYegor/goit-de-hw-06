@@ -1,6 +1,6 @@
 # aggregating.py
 
-from kafka_config import create_consumer
+from kafka_config import KAFKA_CONFIG, create_consumer  
 import pandas as pd
 from datetime import datetime, timedelta
 from kafka import KafkaProducer
@@ -8,11 +8,11 @@ import json
 
 # Kafka producer setup
 producer = KafkaProducer(
-    bootstrap_servers='your_bootstrap_servers',
-    security_protocol='SASL_PLAINTEXT',
-    sasl_mechanism='PLAIN',
-    sasl_plain_username='your_username',
-    sasl_plain_password='your_password',
+    bootstrap_servers=KAFKA_CONFIG['bootstrap_servers'],
+    security_protocol=KAFKA_CONFIG['security_protocol'],
+    sasl_mechanism=KAFKA_CONFIG['sasl_mechanism'],
+    sasl_plain_username=KAFKA_CONFIG['sasl_plain_username'],
+    sasl_plain_password=KAFKA_CONFIG['sasl_plain_password'],
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
@@ -32,7 +32,7 @@ def send_alert(window_start, window_end, t_avg, h_avg, code, message):
     print(f"Alert sent: {alert_data}")
 
 def aggregate_sensor_data(window_duration=60, sliding_interval=30, watermark_duration=10):
-    consumer = create_consumer('yk_building_sensors')
+    consumer = create_consumer('yk_building_sensors')  # Теперь эта строка должна работать
     data_buffer = []
     window_start = None
     
